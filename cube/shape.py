@@ -1,4 +1,4 @@
-import random
+import logging
 import threading
 from enum import Enum
 from queue import Queue
@@ -7,6 +7,8 @@ from numpy.core.umath import radians
 from pyglet import clock
 from pyglet.gl import *
 from pyquaternion import Quaternion
+
+logging = logging.getLogger(__name__)
 
 # noinspection PyArgumentList
 Colors = Enum('Colors', {
@@ -18,6 +20,8 @@ Colors = Enum('Colors', {
     'O': [255, 165, 0],
     'Y': [255, 255, 0]})
 
+Modifiers = '\' '
+
 
 class Piece(object):
     Faces = [[2, 6, 7, 3], [0, 2, 3, 1], [0, 4, 6, 2], [4, 5, 7, 6], [5, 1, 3, 7], [0, 1, 5, 4]]
@@ -26,10 +30,10 @@ class Piece(object):
     Moves = {
         'R': {'axis': 0, 'direction': -1, 'filter': (1, None, None), 'face': [3, -3, -2]},
         'L': {'axis': 0, 'direction': +1, 'filter': (-1, None, None), 'face': [1, 3, -2]},
-        'U': {'axis': 1, 'direction': -1, 'filter': (None, 1, None), 'face': [0, 1, -3]},
+        'U': {'axis': 1, 'direction': -1, 'filter': (None, 1, None), 'face': [0, 1, 3]},
         'D': {'axis': 1, 'direction': +1, 'filter': (None, -1, None), 'face': [5, 1, -3]},
         'F': {'axis': 2, 'direction': -1, 'filter': (None, None, 1), 'face': [2, 1, -2]},
-        'B': {'axis': 2, 'direction': +1, 'filter': (None, None, -1), 'face': [4, -1, -2]},
+        'B': {'axis': 2, 'direction': +1, 'filter': (None, None, -1), 'face': [4, -1, 2]},
         'X': {'axis': 0, 'direction': +1, 'filter': (None, None, None), 'face': None},
         'Y': {'axis': 1, 'direction': +1, 'filter': (None, None, None), 'face': None},
         'Z': {'axis': 2, 'direction': +1, 'filter': (None, None, None), 'face': None},
@@ -52,8 +56,8 @@ class Piece(object):
         self._scale = scale
         self._moving = threading.Event()
 
-    def __getitem__(self, item):
-        return self.faces[item]
+    def __eq__(self, other):
+        return self._position == other
 
     @property
     def moving(self):
@@ -103,15 +107,6 @@ class Piece(object):
 
         glPopMatrix()
 
-    # noinspection PyUnusedLocal
-    def tick(self, *args, **kwargs):
-        for i in range(3):
-            self._rotate[i] = (self._rotate[i] + self._animate[i]) % 360
-            if self._animate[i] != 0 and self._rotate[i] % 90 == 0:
-                self._animate[i] = 0
-                self._apply()
-                self._moving.clear()
-
     def rotate(self, spec, speed=10):
         assert 90 // speed * speed == 90, '90 must be a multiple of the speed'
 
@@ -131,36 +126,38 @@ class Piece(object):
         axis_angle = -axis_angle if len(spec) > 1 and spec[1] == '\'' else axis_angle
         self._animate[axis_index] = axis_angle
 
+    # noinspection PyUnusedLocal
+    def tick(self, *args, **kwargs):
+        for i in range(3):
+            self._rotate[i] = (self._rotate[i] + self._animate[i]) % 360
+            if self._animate[i] != 0 and self._rotate[i] % 90 == 0:
+                self._animate[i] = 0
+                self._apply()
+                self._moving.clear()
+
 
 class RubiksCube(object):
-    Modifiers = '\' '
-
     def __init__(self):
         self.pieces = list(Piece(x - 1, y - 1, z - 1)
                            for x in range(3) for y in range(3) for z in range(3)
                            if x != 1 or y != 1 or z != 1)
         self._commands = Queue()
+        self._idle_event = threading.Event()
         clock.schedule_interval(self.tick, interval=0.01)
 
-    @property
-    def moves(self):
-        return list(Piece.Moves.keys())
+    def __getitem__(self, item):
+        return [p for p in self.pieces if p == item][0]
 
     def draw(self):
         for piece in self.pieces:
             piece.draw()
 
-    def shuffle(self, count=10, speed=15):
-        command = ''
-        for _ in range(count):
-            move = random.choice([m for m in self.moves if m not in 'XYZ'])
-            modifier = random.choice(RubiksCube.Modifiers)
-            command += '{}{} '.format(move, modifier.strip())
-        self.do(command, speed=speed)
-
     def do(self, commands, speed=5):
+        logging.debug('do moves with cube: %s', commands)
+        self._idle_event.clear()
         for command in commands.split(' '):
             self._commands.put((command, speed))
+        self._idle_event.wait()
 
     def tick(self, ts, *args, **kwargs):
         if not self._commands.empty() and all(not piece.moving for piece in self.pieces):
@@ -171,8 +168,8 @@ class RubiksCube(object):
         for cube in self.pieces:
             cube.tick(*args, **kwargs)
 
-    def __getitem__(self, item):
-        return [p for p in self.pieces if p._position == item][0]
+        if self._commands.empty() and not self._idle_event.is_set() and not any(p.moving for p in self.pieces):
+                self._idle_event.set()
 
     def face(self, face):
         axis = Piece.Moves[face]['axis']
@@ -181,13 +178,11 @@ class RubiksCube(object):
 
         pieces = []
         coord = [expected, expected, expected]
-        for j in range(-1,2):
-            for i in range(-1,2):
+        for j in range(-1, 2):
+            for i in range(-1, 2):
                 coord[abs(face_info[1]) - 1] = i if face_info[1] > 0 else 0 - i
                 coord[abs(face_info[2]) - 1] = j if face_info[2] > 0 else 0 - j
                 pieces.append(self[tuple(coord)])
 
-        return ''.join(p.faces[face_info[0]] for p in pieces)
+        return [p.faces[face_info[0]] for p in pieces]
 
-    def __str__(self):
-        return ', '.join(self.face(f) for f in 'ULFRBD')
