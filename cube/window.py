@@ -6,7 +6,8 @@ from pyglet.gl import *
 from pyglet.window import key
 from pyglet.window.key import symbol_string
 
-from .shape import RubiksCube, Piece
+from .shape import Piece
+from .rubiks_cube import RubiksCube
 from .utils import shuffle, print_2d
 
 
