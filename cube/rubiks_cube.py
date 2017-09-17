@@ -25,7 +25,7 @@ class RubiksCube(object):
         for piece in self.pieces.values():
             piece.draw()
 
-    def do(self, commands, speed=5):
+    def do(self, commands, speed):
         logging.debug('do moves with cube: %s', commands)
         self._idle_event.clear()
         for command in commands.split(' '):

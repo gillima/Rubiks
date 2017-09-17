@@ -3,7 +3,7 @@ import random
 from cube.shape import Piece, Modifiers
 
 
-def shuffle(cube, count=10, speed=15):
+def shuffle(cube, count=10, speed=30):
     command = ''
     for _ in range(count):
         move = random.choice([m for m in Piece.Moves.keys() if m not in 'XYZ'])

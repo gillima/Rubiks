@@ -33,6 +33,7 @@ class CubeWindow(object):
 
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
+
         glTranslatef(0, 0, -400)
         glRotatef(self._view_x, 1, 0, 0)
         glRotatef(self._view_y, 0, 1, 0)
@@ -64,11 +65,20 @@ class CubeWindow(object):
                     self._view_x += -15 if symbol == key.UP else 15 if symbol == key.DOWN else 0
                     self._view_y += -15 if symbol == key.LEFT else 15 if symbol == key.RIGHT else 0
 
+                elif symbol == key._1:
+                    self._cube.do("R U R' U'", speed=10)
+                elif symbol == key._2:
+                    self._cube.do("L' U' L U", speed=10)
+                elif symbol == key._3:
+                    self._cube.do("U R U' R' U' F' U F", speed=10)
+                elif symbol == key._4:
+                    self._cube.do("U' F' U F U R U' R'", speed=10)
+
                 elif symbol_string(symbol) in Piece.Moves.keys():
                     command = symbol_string(symbol)
                     if modifiers & key.MOD_SHIFT:
                         command += '\''
-                    self._cube.do(command)
+                    self._cube.do(command, speed=10)
                     print_2d(self._cube)
 
                 elif symbol in [key.HOME]:

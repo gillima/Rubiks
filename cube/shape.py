@@ -1,5 +1,4 @@
 import logging
-import threading
 from enum import Enum
 
 from numpy.core.umath import radians
@@ -8,9 +7,10 @@ from pyquaternion import Quaternion
 
 logging = logging.getLogger(__name__)
 
+
 # noinspection PyArgumentList
 Colors = Enum('Colors', {
-    ' ': [0, 0, 0],
+    ' ': [66, 66, 66],
     'W': [255, 255, 255],
     'G': [0, 128, 0],
     'R': [255, 0, 0],
@@ -24,7 +24,7 @@ Modifiers = '\' '
 class Piece(object):
     Faces = [[2, 6, 7, 3], [0, 2, 3, 1], [0, 4, 6, 2], [4, 5, 7, 6], [5, 1, 3, 7], [0, 1, 5, 4]]
     Vertices = [-1, -1, 1,  -1, -1, -1,  -1, 1, 1,  -1, 1, -1,  1, -1, 1,  1, -1, -1,  1, 1, 1,  1, 1, -1]
-    Scale = 2.1
+    Scale = 2.2
     Moves = {
         'R': {'axis': 0, 'direction': -1, 'filter': (1, None, None), 'face': [3, -3, -2]},
         'L': {'axis': 0, 'direction': +1, 'filter': (-1, None, None), 'face': [1, 3, -2]},
@@ -34,7 +34,7 @@ class Piece(object):
         'B': {'axis': 2, 'direction': +1, 'filter': (None, None, -1), 'face': [4, -1, 2]},
         'X': {'axis': 0, 'direction': +1, 'filter': (None, None, None), 'face': None},
         'Y': {'axis': 1, 'direction': +1, 'filter': (None, None, None), 'face': None},
-        'Z': {'axis': 2, 'direction': +1, 'filter': (None, None, None), 'face': None},
+        'Z': {'axis': 2, 'direction': -1, 'filter': (None, None, None), 'face': None},
     }
 
     def __init__(self, x, y, z, scale=30):
@@ -101,7 +101,7 @@ class Piece(object):
 
         glPopMatrix()
 
-    def rotate(self, spec, speed=10):
+    def rotate(self, spec, speed):
         if not spec or spec[0] not in Piece.Moves:
             return False
 
