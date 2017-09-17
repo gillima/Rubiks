@@ -9,18 +9,20 @@ from cube.shape import Piece
 
 class RubiksCube(object):
     def __init__(self):
-        self.pieces = list(Piece(x - 1, y - 1, z - 1)
-                           for x in range(3) for y in range(3) for z in range(3)
-                           if x != 1 or y != 1 or z != 1)
+        self.pieces = {(x, y, z): Piece(x, y, z)
+                       for x in range(-1,2) for y in range(-1,2) for z in range(-1,2)
+                       if x or y or z}
+        self._moving = []
+
         self._commands = Queue()
         self._idle_event = threading.Event()
         clock.schedule_interval(self.tick, interval=0.01)
 
     def __getitem__(self, item):
-        return [p for p in self.pieces if p == item][0]
+        return self.pieces[item]
 
     def draw(self):
-        for piece in self.pieces:
+        for piece in self.pieces.values():
             piece.draw()
 
     def do(self, commands, speed=5):
@@ -31,16 +33,18 @@ class RubiksCube(object):
         self._idle_event.wait()
 
     def tick(self, ts, *args, **kwargs):
-        if not self._commands.empty() and all(not piece.moving for piece in self.pieces):
+        if not self._moving and not self._commands.empty():
             command, speed = self._commands.get()
-            for cube in self.pieces:
-                cube.rotate(command, speed)
+            self._moving = [cube for cube in self.pieces.values() if cube.rotate(command, speed)]
 
-        for cube in self.pieces:
-            cube.tick(*args, **kwargs)
+        for cube in self.pieces.values():
+            if cube.tick(*args, **kwargs):
+                self._moving.remove(cube)
+                if self._commands.empty() and not self._idle_event.is_set() and not self._moving:
+                    self._idle_event.set()
 
-        if self._commands.empty() and not self._idle_event.is_set() and not any(p.moving for p in self.pieces):
-                self._idle_event.set()
+        if not self._moving:
+            self.pieces = {cube.position: cube for cube in self.pieces.values()}
 
     def face(self, face):
         axis = Piece.Moves[face]['axis']

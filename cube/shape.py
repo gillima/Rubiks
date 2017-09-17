@@ -48,18 +48,13 @@ class Piece(object):
             'Y' if y == -1 else ' ']
         self._colors = [Colors[c].value for c in self.faces]
 
-        self._position = (x, y, z)
+        self.position = (x, y, z)
         self._rotate = [0, 0, 0]
         self._animate = [0, 0, 0]
         self._scale = scale
-        self._moving = threading.Event()
 
     def __eq__(self, other):
-        return self._position == other
-
-    @property
-    def moving(self):
-        return self._moving.is_set()
+        return self.position == other
 
     @staticmethod
     def _rotate_vertex(vertex, ax, ay, az, cast=float):
@@ -83,8 +78,9 @@ class Piece(object):
         for index in range(len(self._vertices) // 3):
             vertex = self._rotate_vertex(self._vertices[index * 3: (index + 1) * 3], *self._rotate)
             self._vertices = self._vertices[:index * 3] + list(vertex) + self._vertices[(index + 1) * 3:]
-        self._position = Piece._rotate_vertex(self._position, *self._rotate, int)
+
         self.faces = Piece._rotate_faces(self.faces, *self._rotate)
+        self.position = Piece._rotate_vertex(self.position, *self._rotate, int)
         self._rotate = [0, 0, 0]
 
     def draw(self):
@@ -93,7 +89,7 @@ class Piece(object):
         glRotatef(self._rotate[0], 1, 0, 0)
         glRotatef(self._rotate[1], 0, 1, 0)
         glRotatef(self._rotate[2], 0, 0, 1)
-        glTranslatef(self._position[0] * self._scale, self._position[1] * self._scale, self._position[2] * self._scale)
+        glTranslatef(self.position[0] * self._scale, self.position[1] * self._scale, self.position[2] * self._scale)
 
         glScalef(self._scale / Piece.Scale, self._scale / Piece.Scale, self._scale / Piece.Scale)
 
@@ -106,31 +102,31 @@ class Piece(object):
         glPopMatrix()
 
     def rotate(self, spec, speed=10):
-        assert 90 // speed * speed == 90, '90 must be a multiple of the speed'
-
         if not spec or spec[0] not in Piece.Moves:
-            return
+            return False
 
         # only animate affected pieces
         axis_filter = Piece.Moves[spec[0]]['filter']
         for index in range(3):
-            if axis_filter[index] is not None and self._position[index] != axis_filter[index]:
-                return
+            if axis_filter[index] is not None and self.position[index] != axis_filter[index]:
+                return False
 
-        # animate
-        self._moving.set()
         axis_index = Piece.Moves[spec[0]]['axis']
         axis_angle = Piece.Moves[spec[0]]['direction'] * speed
         axis_angle = -axis_angle if len(spec) > 1 and spec[1] == '\'' else axis_angle
         self._animate[axis_index] = axis_angle
+        return True
 
     # noinspection PyUnusedLocal
     def tick(self, *args, **kwargs):
+        if not self._animate[0] and not self._animate[1] and not self._animate[2]:
+            return False
+
         for i in range(3):
             self._rotate[i] = (self._rotate[i] + self._animate[i]) % 360
             if self._animate[i] != 0 and self._rotate[i] % 90 == 0:
                 self._animate[i] = 0
                 self._apply()
-                self._moving.clear()
+                return True
 
-
+        return False
