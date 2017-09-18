@@ -3,7 +3,7 @@ import random
 from cube.shape import Piece, Modifiers
 
 
-def shuffle(cube, count=10, speed=30):
+def shuffle(cube, count, speed):
     command = ''
     for _ in range(count):
         move = random.choice([m for m in Piece.Moves.keys() if m not in 'XYZ'])
@@ -12,7 +12,7 @@ def shuffle(cube, count=10, speed=30):
     cube.do(command.strip(), speed=speed)
 
 
-def fitness(cube):
+def correct_placed_pieces(cube):
     def face_fitness(face):
         face = cube.face(face)
         return len([s for s in face if s == face[4]])
@@ -34,4 +34,4 @@ def print_2d(cube):
         l[3:6], f[3:6], r[3:6], b[3:6],
         l[6:9], f[6:9], r[6:9], b[6:9],
         d[0:3], d[3:6], d[6:9]))
-    print('fitness: {}'.format(fitness(cube)))
+    print('correct placed pieces: {}'.format(correct_placed_pieces(cube)))

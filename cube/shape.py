@@ -10,7 +10,7 @@ logging = logging.getLogger(__name__)
 
 # noinspection PyArgumentList
 Colors = Enum('Colors', {
-    ' ': [66, 66, 66],
+    ' ': [50, 50, 50],
     'W': [255, 255, 255],
     'G': [0, 128, 0],
     'R': [255, 0, 0],
@@ -19,12 +19,12 @@ Colors = Enum('Colors', {
     'Y': [255, 255, 0]})
 
 Modifiers = '\' '
+Scale = 2.2
 
 
 class Piece(object):
     Faces = [[2, 6, 7, 3], [0, 2, 3, 1], [0, 4, 6, 2], [4, 5, 7, 6], [5, 1, 3, 7], [0, 1, 5, 4]]
     Vertices = [-1, -1, 1,  -1, -1, -1,  -1, 1, 1,  -1, 1, -1,  1, -1, 1,  1, -1, -1,  1, 1, 1,  1, 1, -1]
-    Scale = 2.2
     Moves = {
         'R': {'axis': 0, 'direction': -1, 'filter': (1, None, None), 'face': [3, -3, -2]},
         'L': {'axis': 0, 'direction': +1, 'filter': (-1, None, None), 'face': [1, 3, -2]},
@@ -91,7 +91,7 @@ class Piece(object):
         glRotatef(self._rotate[2], 0, 0, 1)
         glTranslatef(self.position[0] * self._scale, self.position[1] * self._scale, self.position[2] * self._scale)
 
-        glScalef(self._scale / Piece.Scale, self._scale / Piece.Scale, self._scale / Piece.Scale)
+        glScalef(self._scale / Scale, self._scale / Scale, self._scale / Scale)
 
         count = len(self._vertices) // 3
         for index, face in enumerate(Piece.Faces):

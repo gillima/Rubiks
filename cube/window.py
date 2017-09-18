@@ -41,7 +41,7 @@ class CubeWindow(object):
         self._cube.draw()
 
     def _on_resize(self, width, height):
-        glClearColor(.1, .1, .1, 1)
+        glClearColor(0, 0, 0, 0.2)
         glEnable(GL_DEPTH_TEST)
         glViewport(0, 0, self._window.width, self._window.height)
 
@@ -53,40 +53,46 @@ class CubeWindow(object):
         if symbol in [key.Q, key.ESCAPE]:
             self._stop_event.set()
             exit(0)
-            return
 
-        self._keyboard_buffer.put((symbol, modifiers))
+        elif symbol in [key.UP, key.DOWN, key.LEFT, key.RIGHT]:
+            self._view_x += -15 if symbol == key.UP else 15 if symbol == key.DOWN else 0
+            self._view_y += -15 if symbol == key.LEFT else 15 if symbol == key.RIGHT else 0
+
+        elif symbol in [key.HOME]:
+            self._view_x = 30
+            self._view_y = -30
+
+        else:
+            self._keyboard_buffer.put((symbol, modifiers))
 
     def _process_keyboard(self):
+        macros = {
+            '_1': "R U R' U'",
+            '_2': "L' U' L U",
+            '_3': "U R U' R' U' F' U F",
+            '_4': "U' F' U F U R U' R'",
+            '_5': "R U R' U' " + "L' U' L U " + ("R U R' U' " * 5) + ("L' U' L U " * 5),
+            # '_6': "R U R' U R U U R'",
+            # '_7': "U R U' L' U R' U' L",
+        }
+
         while not self._stop_event.is_set():
             try:
                 symbol, modifiers = self._keyboard_buffer.get(timeout=100)
-                if symbol in [key.UP, key.DOWN, key.LEFT, key.RIGHT]:
-                    self._view_x += -15 if symbol == key.UP else 15 if symbol == key.DOWN else 0
-                    self._view_y += -15 if symbol == key.LEFT else 15 if symbol == key.RIGHT else 0
 
-                elif symbol == key._1:
-                    self._cube.do("R U R' U'", speed=10)
-                elif symbol == key._2:
-                    self._cube.do("L' U' L U", speed=10)
-                elif symbol == key._3:
-                    self._cube.do("U R U' R' U' F' U F", speed=10)
-                elif symbol == key._4:
-                    self._cube.do("U' F' U F U R U' R'", speed=10)
+                if symbol_string(symbol) in macros.keys():
+                    self._cube.do(macros[symbol_string(symbol)], speed=30)
 
                 elif symbol_string(symbol) in Piece.Moves.keys():
                     command = symbol_string(symbol)
                     if modifiers & key.MOD_SHIFT:
                         command += '\''
                     self._cube.do(command, speed=10)
-                    print_2d(self._cube)
-
-                elif symbol in [key.HOME]:
-                    self._view_x = 30
-                    self._view_y = -30
 
                 elif symbol in [key.S]:
-                    shuffle(self._cube)
+                    shuffle(self._cube, count=10, speed=30)
+
+                elif symbol == key.P:
                     print_2d(self._cube)
 
             except TimeoutError:

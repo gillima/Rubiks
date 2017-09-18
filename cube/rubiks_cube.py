@@ -10,13 +10,11 @@ from cube.shape import Piece
 class RubiksCube(object):
     def __init__(self):
         self.pieces = {(x, y, z): Piece(x, y, z)
-                       for x in range(-1,2) for y in range(-1,2) for z in range(-1,2)
+                       for x in range(-1, 2) for y in range(-1, 2) for z in range(-1, 2)
                        if x or y or z}
         self._moving = []
-
-        self._commands = Queue()
+        self._commands = []
         self._idle_event = threading.Event()
-        clock.schedule_interval(self.tick, interval=0.01)
 
     def __getitem__(self, item):
         return self.pieces[item]
@@ -29,22 +27,24 @@ class RubiksCube(object):
         logging.debug('do moves with cube: %s', commands)
         self._idle_event.clear()
         for command in commands.split(' '):
-            self._commands.put((command, speed))
+            self._commands.append((command, speed))
+        clock.schedule_interval(self.tick, interval=0.01)
         self._idle_event.wait()
+        clock.unschedule(self.tick)
 
     def tick(self, ts, *args, **kwargs):
-        if not self._moving and not self._commands.empty():
-            command, speed = self._commands.get()
+        if not self._moving and self._commands:
+            command, speed = self._commands.pop(0)
             self._moving = [cube for cube in self.pieces.values() if cube.rotate(command, speed)]
 
         for cube in self.pieces.values():
             if cube.tick(*args, **kwargs):
                 self._moving.remove(cube)
-                if self._commands.empty() and not self._idle_event.is_set() and not self._moving:
-                    self._idle_event.set()
 
         if not self._moving:
             self.pieces = {cube.position: cube for cube in self.pieces.values()}
+            if not self._idle_event.is_set() and not self._commands:
+                self._idle_event.set()
 
     def face(self, face):
         axis = Piece.Moves[face]['axis']
