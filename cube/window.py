@@ -67,13 +67,13 @@ class CubeWindow(object):
 
     def _process_keyboard(self):
         macros = {
-            '_1': "R U R' U'",
-            '_2': "L' U' L U",
-            '_3': "U R U' R' U' F' U F",
-            '_4': "U' F' U F U R U' R'",
-            '_5': "R U R' U' " + "L' U' L U " + ("R U R' U' " * 5) + ("L' U' L U " * 5),
-            # '_6': "R U R' U R U U R'",
-            # '_7': "U R U' L' U R' U' L",
+            key._1: "R U R' U'",
+            key._2: "L' U' L U",
+            key._3: "U R U' R' U' F' U F",  # place edge of middle layer to the right
+            key._4: "U' F' U F U R U' R'",  # place edge of middle layer to the left
+            key._5: "R U R' U' " + "L' U' L U " + ("R U R' U' " * 5) + ("L' U' L U " * 5),  # non edge destroying rotation of last layer middle pieces
+            key._6: "R U R' U R U U R'",  # rotate middle pieces of last layer counter-clock wise
+            key._7: "U R U' L' U R' U' L",  # exchange top layed edges counter-clock wise
         }
 
         while not self._stop_event.is_set():
