@@ -87,7 +87,7 @@ class Cube(TextCube):
                 self._stable.remove(piece)
                 self._animated.append(piece)
 
-        clock.schedule_interval(self._tick, interval=0.01)
+        clock.schedule_interval(self._tick, interval=AnimationTick)
         self._idle.wait()
 
     def _finish_update(self):

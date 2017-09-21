@@ -15,6 +15,7 @@ class Speed(Enum):
 # Side length of the cube
 CubeSize = 90
 PieceScale = .9
+AnimationTick = 1.0 / 24
 
 # Configuration used for 3D drawing
 Faces = [[2, 6, 7, 3], [0, 2, 3, 1], [0, 4, 6, 2], [4, 5, 7, 6], [5, 1, 3, 7], [0, 1, 5, 4]]

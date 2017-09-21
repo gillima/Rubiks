@@ -15,15 +15,15 @@ view_y = -30
 
 def _on_draw():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+    glPushMatrix()
     glTranslatef(0, 0, -400)
     glRotatef(view_x, 1, 0, 0)
     glRotatef(view_y, 0, 1, 0)
-
     cube.draw()
+    glPopMatrix()
 
 
 def _on_key_press(symbol, modifiers):
@@ -60,11 +60,11 @@ def _on_key_press(symbol, modifiers):
 
 
 def _on_resize(width, height):
+    glViewport(0, 0, width, height)
     glClearColor(0, 0, 0, 0.2)
     glEnable(GL_DEPTH_TEST)
-    glViewport(0, 0, width, height)
-
     glMatrixMode(GL_PROJECTION)
+
     glLoadIdentity()
     gluPerspective(35, width / height, 1, 1000)
 
