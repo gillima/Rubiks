@@ -1,8 +1,7 @@
 import threading
-from itertools import chain
 from queue import Queue
 
-from rubiks.config import Moves, Speed
+from .config import Moves, Speed
 
 
 class CommandQueue(object):
@@ -45,10 +44,12 @@ class Command(object):
     is executed 'non-blocking'.
     """
     def __init__(self, cube, command, queue=DefaultQueue):
+        """ Initializes a new instance of the :class:`Command` class. """
         self._cube = cube
         self._command = command[0]
         self._inverse = False
         self._count = 1
+        self._done = threading.Event()
         self._queue = queue
 
         command = command[1:]
@@ -61,15 +62,23 @@ class Command(object):
             self._inverse = False
 
     def __call__(self, *args, **kwargs):
-        self._queue(self.execute, *args, **kwargs)
+        """ Places the command on the queue for execution """
+        self._done.clear()
+        self._queue(self._execute, *args, **kwargs)
 
     def __str__(self):
+        """ Returns the string representing the current command in cube notation. """
         return '{}{}{}'.format(
             self._command,
             '' if not self._inverse else "'",
             '' if self._count == 1 else self._count)
 
-    def execute(self, *args, **kwargs):
+    def join(self, *args, **kwargs):
+        """ Waits until the current command execution has finished on the command queue. """
+        self._done.wait(*args, **kwargs)
+
+    def _execute(self, *args, **kwargs):
+        """ Performs the cube action on the cube. """
         speed = kwargs.get('speed', Speed.Medium)
         inverse = kwargs.get('inverse')
         inverse = self._inverse if not inverse else not self._inverse
@@ -81,15 +90,17 @@ class Command(object):
                                     inverse if face >= 0 else not inverse, 2)
             self._apply_indices(spec['indices'], inverse, 3)
             self._cube.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
+        self._done.set()
 
+    # noinspection PyProtectedMember
     def _apply_indices(self, indices_list, inverse, offset):
-        source = list(chain.from_iterable(self._cube._faces))
+        source = self._cube._faces[:]
         for indices in indices_list:
             for i in range(len(indices)):
                 i_from = indices[(i + offset) % len(indices)]
                 i_to = indices[i]
                 if inverse:
                     i_from, i_to = i_to, i_from
-                self._cube._faces[i_to // 9][i_to % 9] = source[i_from]
+                self._cube._faces[i_to] = source[i_from]
 
 

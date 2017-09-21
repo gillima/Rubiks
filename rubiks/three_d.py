@@ -42,9 +42,10 @@ class Piece(object):
 
 class Cube(TextCube):
     """
-    OpenGL version to draw a 3D Rubik's Cube.
+    Extends the text based cube with OpenGL based 3D rendering and animations.
     """
     def __init__(self):
+        """ Initializes a new instance of the :class:`Cube` class. """
         super().__init__()
         self._pieces = [Piece(x, y, z, self)
                         for x in range(-1, 2) for y in range(-1, 2) for z in range(-1, 2)
@@ -56,21 +57,17 @@ class Cube(TextCube):
         self._idle = threading.Semaphore()
 
     def draw(self):
+        """ Performs the 3D drawing and rotation of the currently moving pieces (if any) """
         glPushMatrix()
-
-        for piece in self._stable:
-            piece.draw()
-
+        [piece.draw() for piece in self._stable]
         glRotatef(self._rotate[0], 1, 0, 0)
         glRotatef(self._rotate[1], 0, 1, 0)
         glRotatef(self._rotate[2], 0, 0, 1)
-
-        for piece in self._animated:
-            piece.draw()
-
+        [piece.draw() for piece in self._animated]
         glPopMatrix()
 
     def update(self, command, front, inverse, speed):
+        """ Starts the 3D animation for the moved pieces. """
         self._idle.acquire()
         if speed == Speed.Immediate:
             self._finish_update()
@@ -92,6 +89,7 @@ class Cube(TextCube):
         clock.schedule_interval(self._tick, interval=0.01)
 
     def _finish_update(self):
+        """ Reset the rotation and re-apply the new face colors of the pieces """
         self._rotate = [0, 0, 0]
         self._speed = None
 
@@ -101,6 +99,7 @@ class Cube(TextCube):
         self._idle.release()
 
     def _tick(self, ts, *args, **kwargs):
+        """ Scheduler callback used to animate the cube pieces for a move. """
         if self._speed:
             self._rotate[0] = self._rotate[0] + self._speed[0]
             self._rotate[1] = self._rotate[1] + self._speed[1]

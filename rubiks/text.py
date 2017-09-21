@@ -11,51 +11,51 @@ class Cube(object):
     The order of the faces is U, L, F, R, B, D and the order of the pieces is from top left to bottom right.
     """
     def __init__(self):
-        """Initializes a new instance of the :class:Cube: class. """
-        self._faces = [[1] * 9, [2] * 9, [3] * 9, [4] * 9, [5] * 9, [6] * 9]
-        # self._faces = [[1] * 9 + [2] * 9 + [3] * 9 + [4] * 9 + [5] * 9 + [6] * 9]
+        """ Initializes a new instance of the :class:`Cube` class. """
+        self._faces = [1] * 9 + [2] * 9 + [3] * 9 + [4] * 9 + [5] * 9 + [6] * 9
 
     def __str__(self):
-        """Gets the text representation of all cube faces.
-        >>> cube = Cube()
-        >>> print(cube)
-        111111111, 222222222, 333333333, 444444444, 555555555, 666666666
-        """
-        return ', '.join([''.join(str(c) for c in face) for face in self._faces])
+        """ Gets the text representation of all cube faces. """
+        return ', '.join([''.join(str(c) for c in self._faces[face * 6:face * 6 + 9]) for face in range(6)])
 
     def create_commands(self, commands):
+        """ Create :class:Command: instances for all given cube notation commands """
         for command in commands.split(' '):
             yield Command(self, command)
 
     def do(self, commands, **kwargs):
+        """ Performs the cube notation commands with the Rubik's cube. """
         for command in self.create_commands(commands):
             command(**kwargs)
 
     def get_colors(self, x, y, z):
+        """ Get the face colors for the piece at the given position. """
         x1 = x + 1
         y1 = y + 1
         z1 = z + 1
         return [
-            self._faces[0][x1 + z1 * 3] if y == +1 else 0,
-            self._faces[1][z1 + (2 - y1) * 3] if x == -1 else 0,
-            self._faces[2][x1 + (2 - y1) * 3] if z == +1 else 0,
-            self._faces[3][(2 - z1) + (2 - y1) * 3] if x == +1 else 0,
-            self._faces[4][x1 + (2 - y1) * 3] if z == -1 else 0,
-            self._faces[5][x1 + (2 - z1) * 3] if y == -1 else 0]
+            self._faces[x1 + z1 * 3] if y == +1 else 0,
+            self._faces[9 + z1 + (2 - y1) * 3] if x == -1 else 0,
+            self._faces[18 + x1 + (2 - y1) * 3] if z == +1 else 0,
+            self._faces[27 + (2 - z1) + (2 - y1) * 3] if x == +1 else 0,
+            self._faces[36 + x1 + (2 - y1) * 3] if z == -1 else 0,
+            self._faces[45 + x1 + (2 - z1) * 3] if y == -1 else 0]
 
-    def print(self):
+    def dump(self):
+        """ Dumps the current state of the Rubik's cube to stdout. """
         for row in range(3):
-            print('       {}'.format(' '.join(str(i) for i in self._faces[0][row * 3:row * 3 + 3])))
+            print('       {}'.format(' '.join(str(i) for i in self._faces[row * 3:3 + row * 3])))
         for row in range(3):
             print('{}  {}  {}  {}'.format(
-                ' '.join(str(i) for i in self._faces[1][row * 3:row * 3 + 3]),
-                ' '.join(str(i) for i in self._faces[2][row * 3:row * 3 + 3]),
-                ' '.join(str(i) for i in self._faces[3][row * 3:row * 3 + 3]),
-                ' '.join(str(i) for i in self._faces[4][row * 3:row * 3 + 3][::-1])))
+                ' '.join(str(i) for i in self._faces[9 + row * 3:12 + row * 3]),
+                ' '.join(str(i) for i in self._faces[18 + row * 3:21 + row * 3]),
+                ' '.join(str(i) for i in self._faces[27 + row * 3:30 + row * 3]),
+                ' '.join(str(i) for i in self._faces[36 + row * 3:39 + row * 3][::-1])))
         for row in range(3):
-            print('       {}'.format(' '.join(str(i) for i in self._faces[5][row * 3:row * 3 + 3])))
+            print('       {}'.format(' '.join(str(i) for i in self._faces[45 + row * 3:48 + row * 3])))
 
     def shuffle(self, count=10, speed=Speed.Fast):
+        """ Creates a random cube notation sequence and performs it on the Rubik's cube """
         commands = ' '.join('{}{}'.format(
             random.choice('ULFRBDMES'),
             'i' if random.randrange(5) == 0 else '') for _ in range(count))
@@ -64,4 +64,5 @@ class Cube(object):
             command(speed=speed)
 
     def update(self, command, front, inverse, speed):
+        """ Allows to perform actions after a cube action. Overwrite to animate a 3D cube """
         pass

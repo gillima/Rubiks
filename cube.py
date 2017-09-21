@@ -7,7 +7,6 @@ from pyglet.window.key import symbol_string
 from rubiks import Cube3D, Speed
 
 cube = Cube3D()
-cube.shuffle(speed=Speed.Immediate)
 view_x = 30
 view_y = -30
 
