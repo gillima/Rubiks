@@ -2,6 +2,9 @@ from enum import Enum
 
 
 # Animation speed for 3D cube
+from pyglet.window import key
+
+
 class Speed(Enum):
     Slow = 5
     Medium = 15
@@ -60,4 +63,14 @@ Moves = {
         [12, 13, 14, 21, 22, 23, 30, 31, 32, 41, 40, 39],
         [15, 16, 17, 24, 25, 26, 33, 34, 35, 44, 43, 42]
     ]),
+}
+
+# Cube notation macros for faster solving
+Macros = {
+    key.F1: "R U R' U'",
+    key.F2: "L' U' L U",
+    key.F3: "U R U' R' U' F' U F",
+    key.F4: "U' L' U L U F U' F'",
+    key.F5: "R U R' U' " * 3,
+    key.F6: "R U R' U' " + "L' U' L U " + "R U R' U' " * 5 + "L' U' L U " * 5
 }

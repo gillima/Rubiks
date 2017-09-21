@@ -54,7 +54,8 @@ class Cube(TextCube):
         self._animated = []
         self._speed = None
         self._stable = self._pieces[:]
-        self._idle = threading.Semaphore()
+        self._idle = threading.Event()
+        self._idle.set()
 
     def draw(self):
         """ Performs the 3D drawing and rotation of the currently moving pieces (if any) """
@@ -68,7 +69,7 @@ class Cube(TextCube):
 
     def update(self, command, front, inverse, speed):
         """ Starts the 3D animation for the moved pieces. """
-        self._idle.acquire()
+        self._idle.clear()
         if speed == Speed.Immediate:
             self._finish_update()
             return
@@ -87,16 +88,18 @@ class Cube(TextCube):
                 self._animated.append(piece)
 
         clock.schedule_interval(self._tick, interval=0.01)
+        self._idle.wait()
 
     def _finish_update(self):
         """ Reset the rotation and re-apply the new face colors of the pieces """
-        self._rotate = [0, 0, 0]
-        self._speed = None
-
         for piece in self._pieces:
             piece.apply_colors(self)
 
-        self._idle.release()
+        self._speed = None
+        self._rotate = [0, 0, 0]
+        self._animated = []
+        self._stable = list(self._pieces)
+        self._idle.set()
 
     def _tick(self, ts, *args, **kwargs):
         """ Scheduler callback used to animate the cube pieces for a move. """
@@ -106,7 +109,5 @@ class Cube(TextCube):
             self._rotate[2] = self._rotate[2] + self._speed[2]
 
         if all(r % 90 == 0 for r in self._rotate):
-            self._animated = []
-            self._stable = list(self._pieces)
             clock.unschedule(self._tick)
             self._finish_update()

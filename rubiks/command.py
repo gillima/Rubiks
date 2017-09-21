@@ -1,5 +1,6 @@
 import threading
 from queue import Queue
+from time import sleep
 
 from .config import Moves, Speed
 
@@ -49,7 +50,6 @@ class Command(object):
         self._command = command[0]
         self._inverse = False
         self._count = 1
-        self._done = threading.Event()
         self._queue = queue
 
         command = command[1:]
@@ -63,7 +63,6 @@ class Command(object):
 
     def __call__(self, *args, **kwargs):
         """ Places the command on the queue for execution """
-        self._done.clear()
         self._queue(self._execute, *args, **kwargs)
 
     def __str__(self):
@@ -72,10 +71,6 @@ class Command(object):
             self._command,
             '' if not self._inverse else "'",
             '' if self._count == 1 else self._count)
-
-    def join(self, *args, **kwargs):
-        """ Waits until the current command execution has finished on the command queue. """
-        self._done.wait(*args, **kwargs)
 
     def _execute(self, *args, **kwargs):
         """ Performs the cube action on the cube. """
@@ -90,7 +85,6 @@ class Command(object):
                                     inverse if face >= 0 else not inverse, 2)
             self._apply_indices(spec['indices'], inverse, 3)
             self._cube.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
-        self._done.set()
 
     # noinspection PyProtectedMember
     def _apply_indices(self, indices_list, inverse, offset):

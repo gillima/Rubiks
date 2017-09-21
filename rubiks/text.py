@@ -20,7 +20,7 @@ class Cube(object):
 
     def create_commands(self, commands):
         """ Create :class:Command: instances for all given cube notation commands """
-        for command in commands.split(' '):
+        for command in commands.strip().split(' '):
             yield Command(self, command)
 
     def do(self, commands, **kwargs):
