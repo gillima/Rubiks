@@ -11,7 +11,6 @@ class Piece(object):
     def __init__(self, x, y, z, cube):
         self._position = (x, y, z)
         self._colors = []
-        self._textures = []
         self._position_scale = CubeSize / 3
         self._piece_size = (CubeSize / 6) * PieceScale
         self.apply_colors(cube)
@@ -21,8 +20,7 @@ class Piece(object):
         return self._position
 
     def apply_colors(self, cube):
-        self._colors = [Colors[c] for c in cube.get_colors(*self._position)]
-        self._textures = [Textures[c] for c in cube.get_colors(*self._position)]
+        self._colors = cube.get_colors(*self._position)
 
     def draw(self):
         glPushMatrix()
@@ -36,13 +34,21 @@ class Piece(object):
             self._piece_size)
 
         for index, face in enumerate(Faces):
-            glEnable(self._textures[index].target)
-            glBindTexture(self._textures[index].target, self._textures[index].id)
+            texture = Textures[self._colors[index]]
+            tex_offset = (1 - PieceScale) / 2
+
+            glEnable(texture.target)
+            glBindTexture(texture.target, texture.id)
+            glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER)
+            glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
+            glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
 
             glBegin(GL_QUADS)
             for vertex_index, vertex in enumerate(face):
-                glColor3ub(*self._colors[index])
-                glTexCoord2f(*TextureUV[vertex_index])
+                glColor3ub(*Colors[self._colors[index]])
+                glTexCoord2f(
+                    TextureUV[vertex_index][0] / PieceScale - tex_offset,
+                    TextureUV[vertex_index][1] / PieceScale - tex_offset)
                 glVertex3f(*Vertices[vertex * 3:vertex * 3 + 3])
             glEnd()
 

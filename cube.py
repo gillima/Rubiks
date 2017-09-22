@@ -7,6 +7,7 @@ from pyglet.window.key import symbol_string
 from rubiks import Cube3D, Speed
 from rubiks.config import Macros, Moves
 
+
 cube = Cube3D()
 keys = key.KeyStateHandler()
 view_x = 30
@@ -63,8 +64,8 @@ def _on_resize(width, height):
     glViewport(0, 0, width, height)
     glClearColor(0, 0, 0, 0.2)
     glEnable(GL_DEPTH_TEST)
-    glMatrixMode(GL_PROJECTION)
 
+    glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(35, width / height, 1, 1000)
 

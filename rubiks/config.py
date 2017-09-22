@@ -14,7 +14,7 @@ class Speed(Enum):
 
 # Side length of the cube
 CubeSize = 90
-PieceScale = 1.0
+PieceScale = 0.95
 AnimationTick = 1.0 / 24
 
 # Configuration used for 3D drawing
