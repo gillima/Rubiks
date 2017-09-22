@@ -1,10 +1,10 @@
 from enum import Enum
 
-
-# Animation speed for 3D cube
+from pyglet.image import load as load_image
 from pyglet.window import key
 
 
+# Animation speed for 3D cube
 class Speed(Enum):
     Slow = 5
     Medium = 15
@@ -14,13 +14,23 @@ class Speed(Enum):
 
 # Side length of the cube
 CubeSize = 90
-PieceScale = .9
+PieceScale = 1.0
 AnimationTick = 1.0 / 24
 
 # Configuration used for 3D drawing
-Faces = [[2, 6, 7, 3], [0, 2, 3, 1], [0, 4, 6, 2], [4, 5, 7, 6], [5, 1, 3, 7], [0, 1, 5, 4]]
-Vertices = [-1, -1, 1, -1, -1, -1, -1, 1, 1, -1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1]
+Faces = [[4, 5, 6, 7], [3, 0, 4, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [0, 1, 2, 3]]
+Vertices = [-1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1]
 Colors = [[50, 50, 50], [255, 255, 255], [0, 128, 0], [255, 0, 0], [0, 0, 255], [255, 144, 0], [255, 255, 0]]
+
+TextureUV = [[0, 0], [0, 1], [1, 1], [1, 0]]
+Textures = [
+    load_image('resources/black.png').get_texture(),
+    load_image('resources/white.png').get_texture(),
+    load_image('resources/green.png').get_texture(),
+    load_image('resources/red.png').get_texture(),
+    load_image('resources/blue.png').get_texture(),
+    load_image('resources/orange.png').get_texture(),
+    load_image('resources/yellow.png').get_texture()]
 
 # Axis, front face and rotation direction for animation
 Animation = {

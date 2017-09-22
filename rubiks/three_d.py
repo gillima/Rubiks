@@ -11,6 +11,7 @@ class Piece(object):
     def __init__(self, x, y, z, cube):
         self._position = (x, y, z)
         self._colors = []
+        self._textures = []
         self._position_scale = CubeSize / 3
         self._piece_size = (CubeSize / 6) * PieceScale
         self.apply_colors(cube)
@@ -21,6 +22,7 @@ class Piece(object):
 
     def apply_colors(self, cube):
         self._colors = [Colors[c] for c in cube.get_colors(*self._position)]
+        self._textures = [Textures[c] for c in cube.get_colors(*self._position)]
 
     def draw(self):
         glPushMatrix()
@@ -32,11 +34,18 @@ class Piece(object):
             self._piece_size,
             self._piece_size,
             self._piece_size)
+
         for index, face in enumerate(Faces):
-            pyglet.graphics.draw_indexed(
-                8, GL_QUADS, face,
-                ('v3f', Vertices),
-                ('c3B', self._colors[index] * 8))
+            glEnable(self._textures[index].target)
+            glBindTexture(self._textures[index].target, self._textures[index].id)
+
+            glBegin(GL_QUADS)
+            for vertex_index, vertex in enumerate(face):
+                glColor3ub(*self._colors[index])
+                glTexCoord2f(*TextureUV[vertex_index])
+                glVertex3f(*Vertices[vertex * 3:vertex * 3 + 3])
+            glEnd()
+
         glPopMatrix()
 
 
@@ -101,7 +110,8 @@ class Cube(TextCube):
         self._stable = list(self._pieces)
         self._idle.set()
 
-    def _tick(self, ts, *args, **kwargs):
+    # noinspection PyUnusedLocal
+    def _tick(self, *args, **kwargs):
         """ Scheduler callback used to animate the cube pieces for a move. """
         if self._speed:
             self._rotate[0] = self._rotate[0] + self._speed[0]

@@ -1,6 +1,5 @@
 import threading
 from queue import Queue
-from time import sleep
 
 from .config import Moves, Speed
 
