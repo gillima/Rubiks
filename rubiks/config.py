@@ -14,7 +14,8 @@ class Speed(Enum):
 
 # Side length of the cube
 CubeSize = 90
-PieceScale = 0.95
+PieceScale = 0.9
+TextureScale = 0.8
 AnimationTick = 1.0 / 24
 
 # Configuration used for 3D drawing
@@ -22,7 +23,12 @@ Faces = [[4, 5, 6, 7], [3, 0, 4, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [
 Vertices = [-1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1]
 Colors = [[50, 50, 50], [255, 255, 255], [0, 128, 0], [255, 0, 0], [0, 0, 255], [255, 144, 0], [255, 255, 0]]
 
-TextureUV = [[0, 0], [0, 1], [1, 1], [1, 0]]
+TextureOffset = (1 - TextureScale) / 2
+TextureUV = [
+    [-TextureOffset, -TextureOffset],
+    [-TextureOffset, 1 + TextureOffset],
+    [1 + TextureOffset, 1 + TextureOffset],
+    [1 + TextureOffset, -TextureOffset]]
 Textures = [
     load_image('resources/black.png').get_texture(),
     load_image('resources/white.png').get_texture(),

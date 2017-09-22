@@ -8,71 +8,70 @@ from rubiks import Cube3D, Speed
 from rubiks.config import Macros, Moves
 
 
-cube = Cube3D()
-keys = key.KeyStateHandler()
-view_x = 30
-view_y = -30
+class CubeWindow(object):
+    def __init__(self):
+        self._cube = Cube3D()
+        self._view_x = 30
+        self._view_y = -30
 
+        self._window = pyglet.window.Window(width=480, height=450, caption="The Rubik's Cube", resizable=True)
+        self._window.on_draw = self._on_draw
+        self._window.on_resize = self._on_resize
+        self._window.on_key_press = self._on_key_press
 
-def _on_draw():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glMatrixMode(GL_MODELVIEW)
-    glLoadIdentity()
+    def _on_draw(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
 
-    glPushMatrix()
-    glTranslatef(0, 0, -400)
-    glRotatef(view_x, 1, 0, 0)
-    glRotatef(view_y, 0, 1, 0)
-    cube.draw()
-    glPopMatrix()
+        glPushMatrix()
+        glTranslatef(0, 0, -400)
+        glRotatef(self._view_x, 1, 0, 0)
+        glRotatef(self._view_y, 0, 1, 0)
+        self._cube.draw()
+        glPopMatrix()
 
+    def _on_key_press(self, symbol, modifiers):
+        if symbol in [key.Q, key.ESCAPE]:
+            sys.exit(0)
 
-def _on_key_press(symbol, modifiers):
-    global view_x, view_y
+        elif symbol in [key.UP, key.DOWN, key.LEFT, key.RIGHT]:
+            self._view_x += -15 if symbol == key.UP else 15 if symbol == key.DOWN else 0
+            self._view_y += -15 if symbol == key.LEFT else 15 if symbol == key.RIGHT else 0
 
-    if symbol in [key.Q, key.ESCAPE]:
-        sys.exit(0)
+        elif symbol == key.HOME:
+            self._view_x = 30
+            self._view_y = -30
 
-    elif symbol in [key.UP, key.DOWN, key.LEFT, key.RIGHT]:
-        view_x += -15 if symbol == key.UP else 15 if symbol == key.DOWN else 0
-        view_y += -15 if symbol == key.LEFT else 15 if symbol == key.RIGHT else 0
+        elif symbol in [key.ASTERISK, key.NUM_MULTIPLY]:
+            self._cube.shuffle(count=10, speed=Speed.Fast)
+            pass
 
-    elif symbol == key.HOME:
-        view_x = 30
-        view_y = -30
+        elif symbol in Macros.keys():
+            commands = list(self._cube.create_commands(Macros[symbol]))
+            inverted = modifiers & key.MOD_SHIFT
+            if inverted:
+                commands.reverse()
+            for command in commands:
+                command(inverse=inverted, speed=Speed.Medium)
 
-    elif symbol in [key.ASTERISK, key.NUM_MULTIPLY]:
-        cube.shuffle(count=10, speed=Speed.Fast)
-        pass
+        elif symbol_string(symbol) in Moves.keys():
+            command = symbol_string(symbol)
+            if modifiers & key.MOD_SHIFT:
+                command += 'i'
+            self._cube.do(command, speed=Speed.Medium)
 
-    elif symbol in Macros.keys():
-        commands = list(cube.create_commands(Macros[symbol]))
-        inverted = modifiers & key.MOD_SHIFT
-        if inverted:
-            commands.reverse()
-        for command in commands:
-            command(inverse=inverted, speed=Speed.Medium)
+    def _on_resize(self, width, height):
+        glViewport(0, 0, width, height)
+        glClearColor(0.1, 0.1, 0.1, 1.0)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
 
-    elif symbol_string(symbol) in Moves.keys():
-        command = symbol_string(symbol)
-        if modifiers & key.MOD_SHIFT:
-            command += 'i'
-        cube.do(command, speed=Speed.Medium)
-
-
-def _on_resize(width, height):
-    glViewport(0, 0, width, height)
-    glClearColor(0, 0, 0, 0.2)
-    glEnable(GL_DEPTH_TEST)
-
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    gluPerspective(35, width / height, 1, 1000)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(35, width / height, 1, 1000)
 
 
 if __name__ == '__main__':
-    window = pyglet.window.Window(width=480, height=450, caption="The Rubik's Cube", resizable=True)
-    window.on_draw = _on_draw
-    window.on_resize = _on_resize
-    window.on_key_press = _on_key_press
+    window = CubeWindow()
     pyglet.app.run()

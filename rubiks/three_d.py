@@ -35,8 +35,6 @@ class Piece(object):
 
         for index, face in enumerate(Faces):
             texture = Textures[self._colors[index]]
-            tex_offset = (1 - PieceScale) / 2
-
             glEnable(texture.target)
             glBindTexture(texture.target, texture.id)
             glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER)
@@ -46,9 +44,7 @@ class Piece(object):
             glBegin(GL_QUADS)
             for vertex_index, vertex in enumerate(face):
                 glColor3ub(*Colors[self._colors[index]])
-                glTexCoord2f(
-                    TextureUV[vertex_index][0] / PieceScale - tex_offset,
-                    TextureUV[vertex_index][1] / PieceScale - tex_offset)
+                glTexCoord2f(*TextureUV[vertex_index])
                 glVertex3f(*Vertices[vertex * 3:vertex * 3 + 3])
             glEnd()
 
