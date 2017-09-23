@@ -15,8 +15,8 @@ class Speed(Enum):
 
 # Side length of the cube
 CubeSize = 90
-PieceScale = 0.98
-FaceSize = 0.8
+PieceScale = 0.995
+FaceSize = 0.85
 AnimationTick = 1.0 / 24
 
 # Configuration used for 3D drawing
@@ -26,7 +26,7 @@ FacesScale = [[FaceSize, 1, FaceSize], [1, FaceSize, FaceSize], [FaceSize, FaceS
               [1, FaceSize, FaceSize], [FaceSize, FaceSize, 1], [FaceSize, 1, FaceSize]]
 
 # Color and texture configuration
-Colors = [[0, 0, 0], [255, 255, 255], [0, 128, 0], [255, 0, 0], [0, 0, 255], [255, 144, 0], [255, 255, 0]]
+Colors = [[0, 0, 0], [255, 255, 255], [0, 100, 50], [150, 0, 0], [0, 50, 155], [230, 100, 0], [255, 255, 0]]
 Background = [0.3, 0.3, 0.3, 1]
 
 TextureUV = [[0, 0], [0, 1.0], [1.0, 1.0], [1.0, 0]]
