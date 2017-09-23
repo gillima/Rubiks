@@ -44,14 +44,8 @@ class Piece(object):
             self._piece_size)
 
         glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-        texture = Textures[0]
-        glEnable(texture.target)
-        glBindTexture(texture.target, texture.id)
-        glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-        glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+        glEnable(TextureMask.target)
+        glBindTexture(TextureMask.target, TextureMask.id)
 
         for index, face in enumerate(Faces):
             if self._colors[index] == 0:
@@ -61,11 +55,14 @@ class Piece(object):
             for vertex_index, vertex in enumerate(face):
                 glColor3ub(*Colors[self._colors[index]])
                 glTexCoord2f(*TextureUV[vertex_index])
-                glVertex3f(*Vertices[vertex * 3:vertex * 3 + 3])
+                glVertex3f(
+                    Vertices[vertex * 3:vertex * 3 + 3][0] * FacesScale[index][0],
+                    Vertices[vertex * 3:vertex * 3 + 3][1] * FacesScale[index][1],
+                    Vertices[vertex * 3:vertex * 3 + 3][2] * FacesScale[index][2])
             glEnd()
-        glDisable(GL_BLEND)
 
-        glDisable(texture.target)
+        glDisable(TextureMask.target)
+        glDisable(GL_BLEND)
         glPopMatrix()
 
 
@@ -85,6 +82,12 @@ class Cube(TextCube):
         self._stable = self._pieces[:]
         self._idle = threading.Event()
         self._idle.set()
+
+    def resize(self):
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
 
     def draw(self):
         """ Performs the 3D drawing and rotation of the currently moving pieces (if any) """

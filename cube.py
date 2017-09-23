@@ -66,6 +66,7 @@ class CubeWindow(object):
         glClearColor(*Background)
         glShadeModel(GL_SMOOTH)
         glEnable(GL_DEPTH_TEST)
+        self._cube.resize()
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
