@@ -17,49 +17,25 @@ class CubeWindow(object):
         self._view_x = 30
         self._view_y = -30
 
+        self._ratio = 768 / 1024
         self._window = pyglet.window.Window(width=1024, height=768, caption="The Rubik's Cube", resizable=True)
-        self._window.on_draw = self._on_draw
-        self._window.on_resize = self._on_resize
-        self._window.on_key_press = self._on_key_press
+        self._window.push_handlers(
+            self.on_draw,
+            self.on_key_press,
+            self.on_resize)
 
-    def _on_draw(self):
+    def on_draw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         self._draw_2d_cube()
         self._draw_3d_cube()
 
-    def _draw_2d_cube(self):
-        glDisable(GL_DEPTH_TEST)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(-self._window.width / 2., self._window.width / 2.,
-                -self._window.height / 2., self._window.height / 2.,
-                0, 8192)
+    def on_resize(self, width, height):
+        glClearColor(*Background)
+        glShadeModel(GL_SMOOTH)
+        glViewport(0, 0, width, height)
+        self._cube3d.resize()
 
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        glTranslatef(-self._window.width / 2, self._window.height // 2, 0)
-
-        # draw the 2D cube
-        glTranslatef(0, 0, 0)
-        self._cube2d.draw()
-
-    def _draw_3d_cube(self):
-        glEnable(GL_DEPTH_TEST)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(35, self._window.width / self._window.height, 1, 1000)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-
-        # draw the 3d cube
-        glPushMatrix()
-        glTranslatef(50, -20, -400)
-        glRotatef(self._view_x, 1, 0, 0)
-        glRotatef(self._view_y, 0, 1, 0)
-        self._cube3d.draw()
-        glPopMatrix()
-
-    def _on_key_press(self, symbol, modifiers):
+    def on_key_press(self, symbol, modifiers):
         if symbol in [key.Q, key.ESCAPE]:
             sys.exit(0)
 
@@ -92,12 +68,37 @@ class CubeWindow(object):
             for command in self._cube3d.create_commands(command):
                 command(speed=Speed.Medium)
 
-    def _on_resize(self, width, height):
-        self._window.invalid = True
-        glClearColor(*Background)
-        glShadeModel(GL_SMOOTH)
-        glViewport(0, 0, self._window.width, self._window.height)
-        self._cube3d.resize()
+    def _draw_2d_cube(self):
+        glDisable(GL_DEPTH_TEST)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(-self._window.width / 2., self._window.width / 2.,
+                -self._window.height / 2., self._window.height / 2.,
+                0, 8192)
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        glTranslatef(-self._window.width / 2, self._window.height // 2, 0)
+
+        # draw the 2D cube
+        glTranslatef(0, 0, 0)
+        self._cube2d.draw()
+
+    def _draw_3d_cube(self):
+        glEnable(GL_DEPTH_TEST)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(35, self._window.width / self._window.height, 1, 1000)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+        # draw the 3d cube
+        glPushMatrix()
+        glTranslatef(50, -20, -400)
+        glRotatef(self._view_x, 1, 0, 0)
+        glRotatef(self._view_y, 0, 1, 0)
+        self._cube3d.draw()
+        glPopMatrix()
 
 
 if __name__ == '__main__':
