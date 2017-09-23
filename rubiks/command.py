@@ -88,15 +88,14 @@ class Command(object):
     def update(self, command, front, inverse, speed):
         self._cube.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
 
-    # noinspection PyProtectedMember
     def _apply_indices(self, indices_list, inverse, offset):
-        source = self._cube._faces[:]
+        source = self._cube.faces[:]
         for indices in indices_list:
             for i in range(len(indices)):
                 i_from = indices[(i + offset) % len(indices)]
                 i_to = indices[i]
                 if inverse:
                     i_from, i_to = i_to, i_from
-                self._cube._faces[i_to] = source[i_from]
+                self._cube.faces[i_to] = source[i_from]
 
 

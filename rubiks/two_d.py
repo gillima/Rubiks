@@ -28,7 +28,7 @@ class Face(object):
             y_offset = 3.5 + (self._index - self._face * 9) // 3
         glTranslatef(1 + x_offset, -2 - y_offset, 0)
 
-        glColor3ub(*Colors[self._cube._faces[self._index]])
+        glColor3ub(*Colors[self._cube.faces[self._index]])
         glBegin(GL_QUADS)
         glVertex2f(0, 0)
         glVertex2f(0, .9)

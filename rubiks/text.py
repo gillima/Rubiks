@@ -14,6 +14,10 @@ class Cube(object):
         """ Initializes a new instance of the :class:`Cube` class. """
         self._faces = [1] * 9 + [2] * 9 + [3] * 9 + [4] * 9 + [5] * 9 + [6] * 9
 
+    @property
+    def faces(self):
+        return self._faces
+
     def __str__(self):
         """ Gets the text representation of all cube faces. """
         return ', '.join([''.join(str(c) for c in self._faces[face * 6:face * 6 + 9]) for face in range(6)])
