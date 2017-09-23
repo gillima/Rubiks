@@ -83,7 +83,10 @@ class Command(object):
                 self._apply_indices([[i + abs(face) * 9 for i in [0, 3, 6, 7, 8, 5, 2, 1]]],
                                     inverse if face >= 0 else not inverse, 2)
             self._apply_indices(spec['indices'], inverse, 3)
-            self._cube.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
+            self.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
+
+    def update(self, command, front, inverse, speed):
+        self._cube.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
 
     # noinspection PyProtectedMember
     def _apply_indices(self, indices_list, inverse, offset):

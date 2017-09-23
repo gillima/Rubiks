@@ -5,13 +5,14 @@ from pyglet.gl import *
 from pyglet.window import key
 from pyglet.window.key import symbol_string
 
-from rubiks import Cube3D, Speed
+from rubiks import Cube, Cube3D, Speed
 from rubiks.config import Macros, Moves, Background
 
 
 class CubeWindow(object):
     def __init__(self):
-        self._cube = Cube3D()
+        self._cube = Cube()
+        self._cube3d = Cube3D(self._cube)
         self._view_x = 30
         self._view_y = -30
 
@@ -29,7 +30,7 @@ class CubeWindow(object):
         glTranslatef(0, 0, -400)
         glRotatef(self._view_x, 1, 0, 0)
         glRotatef(self._view_y, 0, 1, 0)
-        self._cube.draw()
+        self._cube3d.draw()
         glPopMatrix()
 
     def _on_key_press(self, symbol, modifiers):
@@ -45,11 +46,13 @@ class CubeWindow(object):
             self._view_y = -30
 
         elif symbol in [key.ASTERISK, key.NUM_MULTIPLY]:
-            self._cube.shuffle(count=10, speed=Speed.Fast)
+            commands = self._cube.shuffle(count=10)
+            for command in self._cube3d.create_commands(commands):
+                command(speed=Speed.Fast)
             pass
 
         elif symbol in Macros.keys():
-            commands = list(self._cube.create_commands(Macros[symbol]))
+            commands = list(self._cube3d.create_commands(Macros[symbol]))
             inverted = modifiers & key.MOD_SHIFT
             if inverted:
                 commands.reverse()
@@ -60,14 +63,15 @@ class CubeWindow(object):
             command = symbol_string(symbol)
             if modifiers & key.MOD_SHIFT:
                 command += 'i'
-            self._cube.do(command, speed=Speed.Medium)
+            for command in self._cube3d.create_commands(command):
+                command(speed=Speed.Medium)
 
     def _on_resize(self, width, height):
         glViewport(0, 0, width, height)
         glClearColor(*Background)
         glShadeModel(GL_SMOOTH)
         glEnable(GL_DEPTH_TEST)
-        self._cube.resize()
+        self._cube3d.resize()
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()

@@ -23,11 +23,6 @@ class Cube(object):
         for command in commands.strip().split(' '):
             yield Command(self, command)
 
-    def do(self, commands, **kwargs):
-        """ Performs the cube notation commands with the Rubik's cube. """
-        for command in self.create_commands(commands):
-            command(**kwargs)
-
     def get_colors(self, x, y, z):
         """ Get the face colors for the piece at the given position. """
         x1 = x + 1
@@ -60,9 +55,4 @@ class Cube(object):
             random.choice('ULFRBDMES'),
             'i' if random.randrange(5) == 0 else '') for _ in range(count))
 
-        for command in self.create_commands(commands.strip()):
-            command(speed=speed)
-
-    def update(self, command, front, inverse, speed):
-        """ Allows to perform actions after a cube action. Overwrite to animate a 3D cube """
-        pass
+        return commands.strip()

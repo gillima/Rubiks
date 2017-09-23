@@ -66,14 +66,14 @@ class Piece(object):
         glPopMatrix()
 
 
-class Cube(TextCube):
+class Cube(object):
     """
     Extends the text based cube with OpenGL based 3D rendering and animations.
     """
-    def __init__(self):
+    def __init__(self, cube=TextCube()):
         """ Initializes a new instance of the :class:`Cube` class. """
-        super().__init__()
-        self._pieces = [Piece(x, y, z, self)
+        self._cube = cube
+        self._pieces = [Piece(x, y, z, self._cube)
                         for x in range(-1, 2) for y in range(-1, 2) for z in range(-1, 2)
                         if x or y or z]
         self._rotate = [0, 0, 0]
@@ -88,6 +88,12 @@ class Cube(TextCube):
         glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
         glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+
+    def create_commands(self, commands):
+        """ Create :class:Command: instances for all given cube notation commands """
+        for command in self._cube.create_commands(commands):
+            command.update = self.update
+            yield command
 
     def draw(self):
         """ Performs the 3D drawing and rotation of the currently moving pieces (if any) """
@@ -125,7 +131,7 @@ class Cube(TextCube):
     def _finish_update(self):
         """ Reset the rotation and re-apply the new face colors of the pieces """
         for piece in self._pieces:
-            piece.apply_colors(self)
+            piece.apply_colors(self._cube)
 
         self._speed = None
         self._rotate = [0, 0, 0]
