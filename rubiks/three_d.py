@@ -28,18 +28,34 @@ class Piece(object):
             self._position[0] * self._position_scale,
             self._position[1] * self._position_scale,
             self._position[2] * self._position_scale)
+
+        glPushMatrix()
+        glScalef(
+            self._piece_size * 0.99,
+            self._piece_size * 0.99,
+            self._piece_size * 0.99)
+        glColor3ub(*Colors[0])
+        RoundedCube.draw()
+        glPopMatrix()
+
         glScalef(
             self._piece_size,
             self._piece_size,
             self._piece_size)
 
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        texture = Textures[0]
+        glEnable(texture.target)
+        glBindTexture(texture.target, texture.id)
+        glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+        glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+
         for index, face in enumerate(Faces):
-            texture = Textures[self._colors[index]]
-            glEnable(texture.target)
-            glBindTexture(texture.target, texture.id)
-            glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER)
-            glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
-            glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+            if self._colors[index] == 0:
+                continue
 
             glBegin(GL_QUADS)
             for vertex_index, vertex in enumerate(face):
@@ -47,7 +63,9 @@ class Piece(object):
                 glTexCoord2f(*TextureUV[vertex_index])
                 glVertex3f(*Vertices[vertex * 3:vertex * 3 + 3])
             glEnd()
+        glDisable(GL_BLEND)
 
+        glDisable(texture.target)
         glPopMatrix()
 
 

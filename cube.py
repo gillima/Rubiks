@@ -5,7 +5,7 @@ from pyglet.window import key
 from pyglet.window.key import symbol_string
 
 from rubiks import Cube3D, Speed
-from rubiks.config import Macros, Moves
+from rubiks.config import Macros, Moves, Background
 
 
 class CubeWindow(object):
@@ -63,9 +63,9 @@ class CubeWindow(object):
 
     def _on_resize(self, width, height):
         glViewport(0, 0, width, height)
-        glClearColor(0.1, 0.1, 0.1, 1.0)
+        glClearColor(*Background)
+        glShadeModel(GL_SMOOTH)
         glEnable(GL_DEPTH_TEST)
-        glEnable(GL_BLEND)
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()

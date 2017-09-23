@@ -1,5 +1,6 @@
 from enum import Enum
 
+from .wavefront import Wavefront
 from pyglet.image import load as load_image
 from pyglet.window import key
 
@@ -14,21 +15,16 @@ class Speed(Enum):
 
 # Side length of the cube
 CubeSize = 90
-PieceScale = 0.9
-TextureScale = 0.8
+PieceScale = 0.98
 AnimationTick = 1.0 / 24
 
 # Configuration used for 3D drawing
 Faces = [[4, 5, 6, 7], [3, 0, 4, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [0, 1, 2, 3]]
 Vertices = [-1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1]
-Colors = [[50, 50, 50], [255, 255, 255], [0, 128, 0], [255, 0, 0], [0, 0, 255], [255, 144, 0], [255, 255, 0]]
+Colors = [[0, 0, 0], [255, 255, 255], [0, 128, 0], [255, 0, 0], [0, 0, 255], [255, 144, 0], [255, 255, 0]]
+Background = [0.3, 0.3, 0.3, 1]
 
-TextureOffset = (1 - TextureScale) / 2
-TextureUV = [
-    [-TextureOffset, -TextureOffset],
-    [-TextureOffset, 1 + TextureOffset],
-    [1 + TextureOffset, 1 + TextureOffset],
-    [1 + TextureOffset, -TextureOffset]]
+TextureUV = [[0, 0], [0, 1.0], [1.0, 1.0], [1.0, 0]]
 Textures = [
     load_image('resources/black.png').get_texture(),
     load_image('resources/white.png').get_texture(),
@@ -37,6 +33,7 @@ Textures = [
     load_image('resources/blue.png').get_texture(),
     load_image('resources/orange.png').get_texture(),
     load_image('resources/yellow.png').get_texture()]
+RoundedCube = Wavefront('resources/rounded_cube.obj')
 
 # Axis, front face and rotation direction for animation
 Animation = {
