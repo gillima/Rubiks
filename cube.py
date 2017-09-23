@@ -5,29 +5,55 @@ from pyglet.gl import *
 from pyglet.window import key
 from pyglet.window.key import symbol_string
 
-from rubiks import Cube, Cube3D, Speed
+from rubiks import Cube, Cube3D, Speed, Cube2D
 from rubiks.config import Macros, Moves, Background
 
 
 class CubeWindow(object):
     def __init__(self):
         self._cube = Cube()
+        self._cube2d = Cube2D(self._cube)
         self._cube3d = Cube3D(self._cube)
         self._view_x = 30
         self._view_y = -30
 
-        self._window = pyglet.window.Window(width=480, height=450, caption="The Rubik's Cube", resizable=True)
+        self._window = pyglet.window.Window(width=1024, height=768, caption="The Rubik's Cube", resizable=True)
         self._window.on_draw = self._on_draw
         self._window.on_resize = self._on_resize
         self._window.on_key_press = self._on_key_press
 
     def _on_draw(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self._draw_2d_cube()
+        self._draw_3d_cube()
+
+    def _draw_2d_cube(self):
+        glDisable(GL_DEPTH_TEST)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(-self._window.width / 2., self._window.width / 2.,
+                -self._window.height / 2., self._window.height / 2.,
+                0, 8192)
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        glTranslatef(-self._window.width / 2, self._window.height // 2, 0)
+
+        # draw the 2D cube
+        glTranslatef(0, 0, 0)
+        self._cube2d.draw()
+
+    def _draw_3d_cube(self):
+        glEnable(GL_DEPTH_TEST)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(35, self._window.width / self._window.height, 1, 1000)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
+        # draw the 3d cube
         glPushMatrix()
-        glTranslatef(0, 0, -400)
+        glTranslatef(50, -20, -400)
         glRotatef(self._view_x, 1, 0, 0)
         glRotatef(self._view_y, 0, 1, 0)
         self._cube3d.draw()
@@ -67,15 +93,11 @@ class CubeWindow(object):
                 command(speed=Speed.Medium)
 
     def _on_resize(self, width, height):
-        glViewport(0, 0, width, height)
+        self._window.invalid = True
         glClearColor(*Background)
         glShadeModel(GL_SMOOTH)
-        glEnable(GL_DEPTH_TEST)
+        glViewport(0, 0, self._window.width, self._window.height)
         self._cube3d.resize()
-
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(35, width / height, 1, 1000)
 
 
 if __name__ == '__main__':

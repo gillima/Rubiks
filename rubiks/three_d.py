@@ -9,18 +9,19 @@ from .text import Cube as TextCube
 
 class Piece(object):
     def __init__(self, x, y, z, cube):
+        self._cube = cube
         self._position = (x, y, z)
         self._colors = []
         self._position_scale = CubeSize / 3
         self._piece_size = (CubeSize / 6) * PieceScale
-        self.apply_colors(cube)
+        self.apply_colors()
 
     @property
     def position(self):
         return self._position
 
-    def apply_colors(self, cube):
-        self._colors = cube.get_colors(*self._position)
+    def apply_colors(self):
+        self._colors = self._cube.get_colors(*self._position)
 
     def draw(self):
         glPushMatrix()
@@ -70,9 +71,9 @@ class Cube(object):
     """
     Extends the text based cube with OpenGL based 3D rendering and animations.
     """
-    def __init__(self, cube=TextCube()):
+    def __init__(self, cube=None):
         """ Initializes a new instance of the :class:`Cube` class. """
-        self._cube = cube
+        self._cube = cube or TextCube()
         self._pieces = [Piece(x, y, z, self._cube)
                         for x in range(-1, 2) for y in range(-1, 2) for z in range(-1, 2)
                         if x or y or z]
@@ -131,7 +132,7 @@ class Cube(object):
     def _finish_update(self):
         """ Reset the rotation and re-apply the new face colors of the pieces """
         for piece in self._pieces:
-            piece.apply_colors(self._cube)
+            piece.apply_colors()
 
         self._speed = None
         self._rotate = [0, 0, 0]
