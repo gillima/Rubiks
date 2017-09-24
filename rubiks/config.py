@@ -77,12 +77,3 @@ Moves = {
     ]),
 }
 
-# Cube notation macros for faster solving
-Macros = {
-    key.F1: "R U R' U'",
-    key.F2: "L' U' L U",
-    key.F3: "U R U' R' U' F' U F",
-    key.F4: "U' L' U L U F U' F'",
-    key.F5: "R U R' U' " * 3,
-    key.F6: "R U R' U' " + "L' U' L U " + "R U R' U' " * 5 + "L' U' L U " * 5
-}

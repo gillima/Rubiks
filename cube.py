@@ -6,7 +6,17 @@ from pyglet.window import key
 from pyglet.window.key import symbol_string
 
 from rubiks import Cube, Cube3D, Speed, Cube2D, History
-from rubiks.config import Macros, Moves, Background
+from rubiks.config import Moves, Background, CubeSize
+
+Macros = {
+    key.F1: "U R U' R' U' F' U F",  # solve middle layer (to right)
+    key.F2: "U' L' U L U F U' F'",  # solve middle layer (to left)
+    key.F3: "R U R' U R U U R'",  # solve top layer
+    key.F4: "R B' R F F R' B R F F R R",  # position the yellow corners
+    key.F5: "R U' R U R U R U' R' U' R R",
+    key.F6: "R U R' U'",
+    key.F7: "L' U' L U",
+}
 
 
 class CubeWindow(object):
@@ -14,7 +24,7 @@ class CubeWindow(object):
         self._cube = Cube()
         self._cube2d = Cube2D(self._cube)
         self._cube3d = Cube3D(self._cube)
-        self._history = History()
+        self._history = History(300, 768 - 400)
         self._view_x = 30
         self._view_y = -30
 
@@ -35,6 +45,7 @@ class CubeWindow(object):
         glShadeModel(GL_SMOOTH)
         glViewport(0, 0, width, height)
         self._cube3d.resize()
+        self._history.resize(width , height - 400)
 
     def on_key_press(self, symbol, modifiers):
         if symbol in [key.Q, key.ESCAPE]:
@@ -81,18 +92,21 @@ class CubeWindow(object):
         glDisable(GL_DEPTH_TEST)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(-self._window.width / 2., self._window.width / 2.,
-                -self._window.height / 2., self._window.height / 2.,
-                0, 8192)
+        glOrtho(0, self._window.width, 0, self._window.height, 0, 8192)
 
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        glTranslatef(-self._window.width / 2, self._window.height // 2, 0)
 
         # draw the 2D cube
-        glTranslatef(0, 0, 0)
+        glPushMatrix()
+        glTranslatef(10, self._window.height - 10, 0)
         self._cube2d.draw()
+        glPopMatrix()
+
+        glPushMatrix()
+        glTranslatef(CubeSize // 3, CubeSize // 3, 0)
         self._history.draw()
+        glPopMatrix()
 
     def _draw_3d_cube(self):
         glEnable(GL_DEPTH_TEST)
