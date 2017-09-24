@@ -25,6 +25,7 @@ class CubeWindow(object):
         self._cube2d = Cube2D(self._cube)
         self._cube3d = Cube3D(self._cube)
         self._history = History(300, 768 - 400)
+        self._command_buffer = None
         self._view_x = 30
         self._view_y = -30
 
@@ -48,7 +49,7 @@ class CubeWindow(object):
         self._history.resize(width , height - 400)
 
     def on_key_press(self, symbol, modifiers):
-        if symbol in [key.Q, key.ESCAPE]:
+        if symbol in [key.ESCAPE]:
             sys.exit(0)
 
         elif symbol in [key.UP, key.DOWN, key.LEFT, key.RIGHT]:
@@ -68,15 +69,37 @@ class CubeWindow(object):
                 command(speed=Speed.Fast)
             pass
 
+        elif symbol == key.Q:
+            if self._command_buffer is not None:
+                self._history.append(self._command_buffer, speed=Speed.Medium)
+                for command in self._command_buffer:
+                    command(speed=Speed.Medium)
+                self._command_buffer = None
+            else:
+                self._command_buffer = []
+
+        elif symbol in range(key._0, key._9 + 1):
+            commands, speed = self._history.get(symbol - key._0)
+            if not commands:
+                return
+
+            inverted = modifiers & key.MOD_CTRL
+            if inverted:
+                commands = [c.invert() for c in commands[::-1]]
+
+            self._history.append(commands, speed=speed)
+            for command in commands:
+                command(speed=speed)
+
         elif symbol in Macros.keys():
-            commands = list(self._cube3d.create_commands(Macros[symbol]))
+            commands = self._cube3d.create_commands(Macros[symbol])
             inverted = modifiers & key.MOD_SHIFT
             if inverted:
-                commands.reverse()
+                commands = [c.invert() for c in commands[::-1]]
 
-            self._history.append(commands, inverse=inverted, speed=Speed.Medium)
+            self._history.append(commands, speed=Speed.Medium)
             for command in commands:
-                command(inverse=inverted, speed=Speed.Medium)
+                command(speed=Speed.Medium)
 
         elif symbol_string(symbol) in Moves.keys():
             command = symbol_string(symbol)
@@ -84,6 +107,10 @@ class CubeWindow(object):
                 command += 'i'
 
             commands = self._cube3d.create_commands(command)
+            if self._command_buffer is not None:
+                self._command_buffer.extend(commands)
+                return
+
             self._history.append(commands, speed=Speed.Medium)
             for command in commands:
                 command(speed=Speed.Medium)

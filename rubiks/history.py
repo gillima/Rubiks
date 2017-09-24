@@ -14,12 +14,14 @@ class History(object):
         self._layout = pyglet.text.layout.ScrollableTextLayout(self._document, width, height, multiline=True, batch=self._batch)
         self._update()
 
-    def append(self, commands, **kwargs):
-        inverse = kwargs.get('inverse', False)
-        speed = kwargs.get('speed', Speed.Medium)
-        command = ' '.join([c.to_string(inverse=inverse) for c in commands])
-        self._commands.append((command, speed))
+    def append(self, commands, speed=Speed.Medium):
+        self._commands.append((commands, speed))
         self._update()
+
+    def get(self, index):
+        if len(self._commands) < index:
+            return None, None
+        return self._commands[int(index) - 1]
 
     def resize(self, width, height):
         self._height = height
@@ -27,12 +29,21 @@ class History(object):
 
     def _update(self):
         self._layout.begin_update()
-        self._document.text = '\n'.join(str(c[0]) for c in self._commands)
+
+        text = ''
+        for i, commands in enumerate(self._commands):
+            if not commands[0]:
+                continue
+            command = ' '.join(['{}'.format(c) for c in commands[0]])
+            text += '{}: {}\n'.format(i + 1, command)
+
+        self._document.text = text
         self._document.set_style(0,len(self._document.text),dict(color=(255,255,255,255)))
 
         if self._document.text:
             self._layout.height = self._height - 30
             self._layout.y = 0
+
         self._layout.view_y = -self._layout.content_height
         self._layout.end_update()
 

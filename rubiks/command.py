@@ -65,32 +65,31 @@ class Command(object):
         """ Places the command on the queue for execution """
         self._queue(self._execute, *args, **kwargs)
 
+    def invert(self):
+        command = Command(self._cube, self._command, self._queue)
+        command._inverse = not self._inverse
+        command.on_updated = self.on_updated
+        return command
+
     def __str__(self):
         """ Returns the string representing the current command in cube notation. """
-        return self.to_string()
-
-    def to_string(self, inverse=False):
-        """ Returns the string representing the current command in cube notation. """
-        inverse = self._inverse if not inverse else not self._inverse
         return '{}{}{}'.format(
             self._command,
-            '' if not inverse else "'",
+            '' if not self._inverse else "'",
             '' if self._count == 1 else self._count)
 
     def _execute(self, *args, **kwargs):
         """ Performs the cube action on the cube. """
         speed = kwargs.get('speed', Speed.Medium)
-        inverse = kwargs.get('inverse')
-        inverse = self._inverse if not inverse else not self._inverse
 
         spec = Moves[self._command]
         for _ in range(self._count):
             for face in spec['face']:
                 self._apply_indices([[i + abs(face) * 9 for i in [0, 3, 6, 7, 8, 5, 2, 1]]],
-                                    inverse if face >= 0 else not inverse, 2)
-            self._apply_indices(spec['indices'], inverse, 3)
+                                    self._inverse if face >= 0 else not self._inverse, 2)
+            self._apply_indices(spec['indices'], self._inverse, 3)
             for handler in self.on_updated:
-                handler(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
+                handler(command=self._command, front=spec['face'], inverse=self._inverse, speed=speed)
 
     def _apply_indices(self, indices_list, inverse, offset):
         source = self._cube.faces[:]
