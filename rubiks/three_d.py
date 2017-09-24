@@ -92,9 +92,10 @@ class Cube(object):
 
     def create_commands(self, commands):
         """ Create :class:Command: instances for all given cube notation commands """
-        for command in self._cube.create_commands(commands):
-            command.update = self.update
-            yield command
+        result = self._cube.create_commands(commands)
+        for command in result:
+            command.on_updated.append(self.update)
+        return result
 
     def draw(self):
         """ Performs the 3D drawing and rotation of the currently moving pieces (if any) """

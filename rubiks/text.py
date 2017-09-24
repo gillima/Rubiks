@@ -24,8 +24,10 @@ class Cube(object):
 
     def create_commands(self, commands):
         """ Create :class:Command: instances for all given cube notation commands """
+        result = []
         for command in commands.strip().split(' '):
-            yield Command(self, command)
+            result.append(Command(self, command))
+        return result
 
     def get_colors(self, x, y, z):
         """ Get the face colors for the piece at the given position. """

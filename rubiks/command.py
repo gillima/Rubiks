@@ -50,6 +50,7 @@ class Command(object):
         self._inverse = False
         self._count = 1
         self._queue = queue
+        self.on_updated = []
 
         command = command[1:]
         if command and command[0] in "i'":
@@ -66,9 +67,14 @@ class Command(object):
 
     def __str__(self):
         """ Returns the string representing the current command in cube notation. """
+        return self.to_string()
+
+    def to_string(self, inverse=False):
+        """ Returns the string representing the current command in cube notation. """
+        inverse = self._inverse if not inverse else not self._inverse
         return '{}{}{}'.format(
             self._command,
-            '' if not self._inverse else "'",
+            '' if not inverse else "'",
             '' if self._count == 1 else self._count)
 
     def _execute(self, *args, **kwargs):
@@ -83,10 +89,8 @@ class Command(object):
                 self._apply_indices([[i + abs(face) * 9 for i in [0, 3, 6, 7, 8, 5, 2, 1]]],
                                     inverse if face >= 0 else not inverse, 2)
             self._apply_indices(spec['indices'], inverse, 3)
-            self.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
-
-    def update(self, command, front, inverse, speed):
-        self._cube.update(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
+            for handler in self.on_updated:
+                handler(command=self._command, front=spec['face'], inverse=inverse, speed=speed)
 
     def _apply_indices(self, indices_list, inverse, offset):
         source = self._cube.faces[:]

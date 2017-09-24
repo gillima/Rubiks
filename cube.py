@@ -5,7 +5,7 @@ from pyglet.gl import *
 from pyglet.window import key
 from pyglet.window.key import symbol_string
 
-from rubiks import Cube, Cube3D, Speed, Cube2D
+from rubiks import Cube, Cube3D, Speed, Cube2D, History
 from rubiks.config import Macros, Moves, Background
 
 
@@ -14,6 +14,7 @@ class CubeWindow(object):
         self._cube = Cube()
         self._cube2d = Cube2D(self._cube)
         self._cube3d = Cube3D(self._cube)
+        self._history = History()
         self._view_x = 30
         self._view_y = -30
 
@@ -48,8 +49,11 @@ class CubeWindow(object):
             self._view_y = -30
 
         elif symbol in [key.ASTERISK, key.NUM_MULTIPLY]:
-            commands = self._cube.shuffle(count=10)
-            for command in self._cube3d.create_commands(commands):
+            commands = self._cube3d.create_commands(
+                self._cube.shuffle(count=10))
+
+            self._history.append(commands, speed=Speed.Fast)
+            for command in commands:
                 command(speed=Speed.Fast)
             pass
 
@@ -58,6 +62,8 @@ class CubeWindow(object):
             inverted = modifiers & key.MOD_SHIFT
             if inverted:
                 commands.reverse()
+
+            self._history.append(commands, inverse=inverted, speed=Speed.Medium)
             for command in commands:
                 command(inverse=inverted, speed=Speed.Medium)
 
@@ -65,7 +71,10 @@ class CubeWindow(object):
             command = symbol_string(symbol)
             if modifiers & key.MOD_SHIFT:
                 command += 'i'
-            for command in self._cube3d.create_commands(command):
+
+            commands = self._cube3d.create_commands(command)
+            self._history.append(commands, speed=Speed.Medium)
+            for command in commands:
                 command(speed=Speed.Medium)
 
     def _draw_2d_cube(self):
@@ -83,6 +92,7 @@ class CubeWindow(object):
         # draw the 2D cube
         glTranslatef(0, 0, 0)
         self._cube2d.draw()
+        self._history.draw()
 
     def _draw_3d_cube(self):
         glEnable(GL_DEPTH_TEST)
