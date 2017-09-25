@@ -1,7 +1,7 @@
 from pyglet.gl import *
 
 from .config import *
-from .text import Cube as TextCube
+from .cube import Cube as TextCube
 
 
 class Face(object):
@@ -13,7 +13,7 @@ class Face(object):
     def draw(self):
         glPushMatrix()
 
-        glScalef(CubeSize // 3, CubeSize // 3, 1)
+        glScalef(CubeSize // 4, CubeSize // 4, 1)
         if self._face == 0:
             x_offset = 3.5 + self._index % 3
             y_offset = (self._index - self._face * 9) // 3
@@ -52,3 +52,5 @@ class Cube(object):
         for face in self._faces:
             face.draw()
 
+    def resize(self, x, y, width, height):
+        pass

@@ -47,6 +47,8 @@ class Command(object):
         """ Initializes a new instance of the :class:`Command` class. """
         self._cube = cube
         self._command = command[0]
+        if self._command not in Moves:
+            raise KeyError('Move not supported: {}'.format(self._command))
         self._inverse = False
         self._count = 1
         self._queue = queue

@@ -1,7 +1,7 @@
 from pyglet.gl import *
 
 
-class Wavefront:
+class Loader:
     def __init__(self, filename, swapyz=False):
         """ Loads a Wavefront OBJ file. """
         self.vertices = []

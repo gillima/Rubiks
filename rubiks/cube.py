@@ -13,6 +13,7 @@ class Cube(object):
     def __init__(self):
         """ Initializes a new instance of the :class:`Cube` class. """
         self._faces = [1] * 9 + [2] * 9 + [3] * 9 + [4] * 9 + [5] * 9 + [6] * 9
+        self.on_command_created = []
 
     @property
     def faces(self):
@@ -26,7 +27,10 @@ class Cube(object):
         """ Create :class:Command: instances for all given cube notation commands """
         result = []
         for command in commands.strip().split(' '):
-            result.append(Command(self, command))
+            cube_command = Command(self, command)
+            for hook in self.on_command_created:
+                hook(self, cube_command)
+            result.append(cube_command)
         return result
 
     def get_colors(self, x, y, z):

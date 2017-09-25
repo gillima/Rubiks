@@ -4,7 +4,7 @@ from pyglet import clock
 from pyglet.gl import *
 
 from .config import *
-from .text import Cube as TextCube
+from .cube import Cube as TextCube
 
 
 class Piece(object):
@@ -74,6 +74,7 @@ class Cube(object):
     def __init__(self, cube=None):
         """ Initializes a new instance of the :class:`Cube` class. """
         self._cube = cube or TextCube()
+        self._cube.on_command_created.append(self._on_command_created)
         self._pieces = [Piece(x, y, z, self._cube)
                         for x in range(-1, 2) for y in range(-1, 2) for z in range(-1, 2)
                         if x or y or z]
@@ -84,19 +85,6 @@ class Cube(object):
         self._idle = threading.Event()
         self._idle.set()
 
-    def resize(self):
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-
-    def create_commands(self, commands):
-        """ Create :class:Command: instances for all given cube notation commands """
-        result = self._cube.create_commands(commands)
-        for command in result:
-            command.on_updated.append(self.update)
-        return result
-
     def draw(self):
         """ Performs the 3D drawing and rotation of the currently moving pieces (if any) """
         glPushMatrix()
@@ -106,6 +94,12 @@ class Cube(object):
         glRotatef(self._rotate[2], 0, 0, 1)
         [piece.draw() for piece in self._animated]
         glPopMatrix()
+
+    def resize(self, x, y, width, height):
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(TextureMask.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
 
     def update(self, command, front, inverse, speed):
         """ Starts the 3D animation for the moved pieces. """
@@ -140,6 +134,9 @@ class Cube(object):
         self._animated = []
         self._stable = list(self._pieces)
         self._idle.set()
+
+    def _on_command_created(self, cube, command):
+        command.on_updated.append(self.update)
 
     # noinspection PyUnusedLocal
     def _tick(self, *args, **kwargs):

@@ -1,8 +1,7 @@
 from enum import Enum
 
-from .wavefront import Wavefront as load_wavefront
+from utils.wavefront import Loader as load_wavefront
 from pyglet.image import load as load_image
-from pyglet.window import key
 
 
 # Animation speed for 3D cube
