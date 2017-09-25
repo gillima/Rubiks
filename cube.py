@@ -39,10 +39,10 @@ class CubeController(object):
                 self._input_mode = InputMode.Command
                 self._set_command(':')
             else:
-                self._direct_mode(symbol, modifiers)
+                return self._direct_mode(symbol, modifiers)
 
         elif self._input_mode == InputMode.Command:
-            self._command_mode(symbol, modifiers)
+            return self._command_mode(symbol, modifiers)
 
     def _set_command(self, command):
         if command == '':
@@ -56,12 +56,15 @@ class CubeController(object):
             command = symbol_string(symbol)
             commands = self.cube.create_commands(command)
             self._execute(commands, invert=modifiers & key.MOD_SHIFT, history=True, speed=Speed.Medium)
-            self._command = ''
+            self._set_command('')
 
         elif symbol in Macros.keys():
             commands = self.cube.create_commands(Macros[symbol])
             self._execute(commands, invert=modifiers & key.MOD_SHIFT, history=True, speed=Speed.Medium)
-            self._command = ''
+            self._set_command('')
+
+        elif symbol == pyglet.window.key.ESCAPE:
+            return pyglet.event.EVENT_HANDLED
 
     def _command_mode(self, symbol, modifiers):
         if symbol_string(symbol) in Moves.keys():
@@ -72,6 +75,9 @@ class CubeController(object):
 
         if symbol == key.EXCLAMATION:
             self._set_command(self._command + '!')
+        elif symbol == pyglet.window.key.ESCAPE:
+            self._set_command('')
+            return pyglet.event.EVENT_HANDLED
         elif symbol == key.ASTERISK:
             self._set_command(self._command + 'shuffle')
         elif symbol == key.BACKSPACE:
