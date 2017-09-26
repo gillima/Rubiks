@@ -33,19 +33,6 @@ class Cube(object):
             result.append(cube_command)
         return result
 
-    def get_colors(self, x, y, z):
-        """ Get the face colors for the piece at the given position. """
-        x1 = x + 1
-        y1 = y + 1
-        z1 = z + 1
-        return [
-            self._faces[x1 + z1 * 3] if y == +1 else 0,
-            self._faces[9 + z1 + (2 - y1) * 3] if x == -1 else 0,
-            self._faces[18 + x1 + (2 - y1) * 3] if z == +1 else 0,
-            self._faces[27 + (2 - z1) + (2 - y1) * 3] if x == +1 else 0,
-            self._faces[36 + x1 + (2 - y1) * 3] if z == -1 else 0,
-            self._faces[45 + x1 + (2 - z1) * 3] if y == -1 else 0]
-
     def dump(self):
         """ Dumps the current state of the Rubik's cube to stdout. """
         for row in range(3):
@@ -59,10 +46,29 @@ class Cube(object):
         for row in range(3):
             print('       {}'.format(' '.join(str(i) for i in self._faces[45 + row * 3:48 + row * 3])))
 
+    def get_colors(self, x, y, z):
+        """ Get the face colors for the piece at the given position. """
+        x1 = x + 1
+        y1 = y + 1
+        z1 = z + 1
+        return [
+            self._faces[x1 + z1 * 3] if y == +1 else 0,
+            self._faces[9 + z1 + (2 - y1) * 3] if x == -1 else 0,
+            self._faces[18 + x1 + (2 - y1) * 3] if z == +1 else 0,
+            self._faces[27 + (2 - z1) + (2 - y1) * 3] if x == +1 else 0,
+            self._faces[36 + x1 + (2 - y1) * 3] if z == -1 else 0,
+            self._faces[45 + x1 + (2 - z1) * 3] if y == -1 else 0]
+
     def shuffle(self, count=10, speed=Speed.Fast):
         """ Creates a random cube notation sequence and performs it on the Rubik's cube """
-        commands = ' '.join('{}{}'.format(
-            random.choice('ULFRBDMES'),
-            'i' if random.randrange(5) == 0 else '') for _ in range(count))
+        previous = '_ '
+        commands = ''
+        shuffled = 0
+        while shuffled < count:
+            command = '{}{} '.format(random.choice('ULFRBDMES'), "'" if random.randrange(5) == 0 else '')
+            if command[0] != previous[0] or command[1] == previous[1]:
+                previous = command
+                commands += command
+                shuffled += 1
 
         return commands.strip()

@@ -15,8 +15,6 @@ class CubeView(object):
         self._command = pyglet.text.Label('')
         self._view_x = 30
         self._view_y = -30
-
-        self._ratio = 768 / 1024
         self._window = window
         self._window.push_handlers(
             self.on_draw,
@@ -35,8 +33,7 @@ class CubeView(object):
         glViewport(0, 0, width, height)
         self._cube2d.resize(0, height - CubeSize, width // 2, CubeSize)
         self._cube3d.resize(0, 0, width, height)
-        self._history.resize(30, 30, width // 2, height - CubeSize * 3 - 30)
-
+        self._history.resize(30, 30, width, height - CubeSize * 3 - 30)
         self._command.x = 30
         self._command.y = 10
 
