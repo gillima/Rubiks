@@ -25,7 +25,7 @@ FacesScale = [[FaceSize, 1, FaceSize], [1, FaceSize, FaceSize], [FaceSize, FaceS
               [1, FaceSize, FaceSize], [FaceSize, FaceSize, 1], [FaceSize, 1, FaceSize]]
 
 # Color and texture configuration
-Colors = [[0, 0, 0], [255, 255, 255], [0, 100, 50], [150, 0, 0], [0, 50, 155], [230, 100, 0], [255, 255, 0]]
+Colors = [[30, 30, 30], [255, 255, 255], [0, 100, 50], [150, 0, 0], [0, 50, 155], [230, 100, 0], [255, 255, 0]]
 Background = [0.3, 0.3, 0.3, 1]
 
 TextureUV = [[0, 0], [0, 1.0], [1.0, 1.0], [1.0, 0]]

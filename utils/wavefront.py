@@ -1,6 +1,9 @@
 from pyglet.gl import *
 
 
+Vector = GLfloat * 3
+
+
 class Loader:
     def __init__(self, filename, swapyz=False):
         """ Loads a Wavefront OBJ file. """

@@ -3,6 +3,7 @@ from pyglet.window import key
 
 from rubiks import Cube2D, Cube3D
 from rubiks.config import Background, CubeSize
+from utils.wavefront import Vector
 
 
 class CubeView(object):
@@ -70,12 +71,20 @@ class CubeView(object):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
+        #draw light
+        glLightfv(GL_LIGHT0, GL_POSITION, Vector(10, 30, 50))
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+
         glPushMatrix()
         glTranslatef(50, -20, -400)
         glRotatef(self._view_x, 1, 0, 0)
         glRotatef(self._view_y, 0, 1, 0)
         self._cube3d.draw()
         glPopMatrix()
+
+        glDisable(GL_LIGHTING)
 
     def _draw_history(self):
         glDisable(GL_DEPTH_TEST)
