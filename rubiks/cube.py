@@ -27,6 +27,8 @@ class Cube(object):
         """ Create :class:Command: instances for all given cube notation commands """
         result = []
         for command in commands.strip().split(' '):
+            if not command:
+                continue
             cube_command = Command(self, command)
             for hook in self.on_command_created:
                 hook(self, cube_command)
