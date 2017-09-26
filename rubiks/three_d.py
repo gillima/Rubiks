@@ -32,9 +32,9 @@ class Piece(object):
 
         glPushMatrix()
         glScalef(
-            self._piece_size * 0.99,
-            self._piece_size * 0.99,
-            self._piece_size * 0.99)
+            self._piece_size,
+            self._piece_size,
+            self._piece_size)
         glColor3ub(*Colors[0])
         RoundedCube.draw()
         glPopMatrix()
