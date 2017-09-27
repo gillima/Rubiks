@@ -33,9 +33,9 @@ class Piece(object):
 
         glPushMatrix()
         glScalef(
-            self._piece_size * 0.99,
-            self._piece_size * 0.99,
-            self._piece_size * 0.99)
+            self._piece_size,
+            self._piece_size,
+            self._piece_size)
         color = Colors[0]
         glColor3ub(*Colors[0])
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, Vector(*[c / 256 * 0.1 for c in color]))
