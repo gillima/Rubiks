@@ -16,7 +16,6 @@ if __name__ == '__main__':
         config = screen.get_best_config(template)
     except NoSuchConfigException:
         config = screen.get_best_config()
-        pass
 
     window = pyglet.window.Window(width=1024, height=768, caption="The Rubik's Cube", resizable=True, config=config)
     window.push_handlers(controller.on_key_press)

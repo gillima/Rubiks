@@ -27,6 +27,7 @@ class CubeView(object):
         self._draw_history()
         self._draw_2d()
         self._draw_3d()
+        glFlush()
 
     def on_resize(self, width, height):
         glClearColor(*Background)
