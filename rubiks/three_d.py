@@ -3,6 +3,7 @@ import threading
 from pyglet import clock
 from pyglet.gl import *
 
+from utils.wavefront import Vector
 from .config import *
 from .cube import Cube as TextCube
 
@@ -35,7 +36,12 @@ class Piece(object):
             self._piece_size,
             self._piece_size,
             self._piece_size)
+
+        color = Colors[0]
         glColor3ub(*Colors[0])
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, Vector(*[c / 256 * 0.1 for c in color]))
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Vector(*[c / 256 * 5 for c in color]))
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.8)
         RoundedCube.draw()
         glPopMatrix()
 
@@ -54,6 +60,10 @@ class Piece(object):
 
             glBegin(GL_QUADS)
             for vertex_index, vertex in enumerate(face):
+                color = Colors[self._colors[index]]
+                glMaterialfv(GL_FRONT, GL_AMBIENT, Vector(*[c / 256 / 0.2 for c in color]))
+                glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Vector(*[c / 256 / 5 for c in color]))
+                glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1)
                 glColor3ub(*Colors[self._colors[index]])
                 glTexCoord2f(*TextureUV[vertex_index])
                 glVertex3f(
