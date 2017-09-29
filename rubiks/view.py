@@ -38,6 +38,7 @@ class CubeView(object):
         self._history.resize(30, 30, width, height - CubeSize * 3 - 30)
         self._command.x = 30
         self._command.y = 10
+        glFlush()
 
     def on_key_press(self, symbol, modifiers):
         if symbol in [key.UP, key.DOWN, key.LEFT, key.RIGHT]:
